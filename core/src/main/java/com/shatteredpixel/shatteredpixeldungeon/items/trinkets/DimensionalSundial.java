@@ -21,10 +21,14 @@
 
 package com.shatteredpixel.shatteredpixeldungeon.items.trinkets;
 
+import com.shatteredpixel.shatteredpixeldungeon.actors.hero.Hero;
 import com.shatteredpixel.shatteredpixeldungeon.messages.Messages;
 import com.shatteredpixel.shatteredpixeldungeon.sprites.ItemSpriteSheet;
 import com.shatteredpixel.shatteredpixeldungeon.utils.GLog;
 
+import com.watabou.utils.GameSettings;
+
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -54,12 +58,45 @@ public class DimensionalSundial extends Trinket {
 		}
 	}
 
+	//MOD: force night toggle, saved in game settings (persists across runs)
+	public static final String AC_NIGHT = "NIGHT";
+	private static final String KEY_FORCE_NIGHT = "mod_sundial_force_night";
+
+	public static boolean forceNight(){
+		return GameSettings.getBoolean(KEY_FORCE_NIGHT, true);
+	}
+
+	@Override
+	public ArrayList<String> actions(Hero hero) {
+		ArrayList<String> actions = super.actions(hero);
+		actions.add(AC_NIGHT);
+		return actions;
+	}
+
+	@Override
+	public String actionName(String action, Hero hero) {
+		if (action.equals(AC_NIGHT)){
+			return forceNight() ? "밤 고정 끄기" : "밤 고정 켜기";
+		}
+		return super.actionName(action, hero);
+	}
+
+	@Override
+	public void execute(Hero hero, String action) {
+		super.execute(hero, action);
+		if (action.equals(AC_NIGHT)){
+			boolean on = !forceNight();
+			GameSettings.put(KEY_FORCE_NIGHT, on);
+			GLog.i(on ? "해시계: 밤 고정 켜짐" : "해시계: 실제 시간 사용");
+		}
+	}
+
 	public static boolean sundialWarned = false;
 
 	public static float spawnMultiplierAtCurrentTime(){
 		if (trinketLevel(DimensionalSundial.class) != -1) {
 			Calendar cal = GregorianCalendar.getInstance();
-			if (cal.get(Calendar.HOUR_OF_DAY) >= 20 || cal.get(Calendar.HOUR_OF_DAY) <= 7) {
+			if (forceNight() || cal.get(Calendar.HOUR_OF_DAY) >= 20 || cal.get(Calendar.HOUR_OF_DAY) <= 7) {
 				if (!sundialWarned){
 					GLog.w(Messages.get(DimensionalSundial.class, "warning"));
 					sundialWarned = true;
