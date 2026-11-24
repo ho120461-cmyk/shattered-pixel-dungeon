@@ -832,7 +832,8 @@ public class Hero extends Char {
 		spend( time );
 		next();
 	}
-	
+
+		private int restBatch = 0;
 	@Override
 	public boolean act() {
 		
@@ -868,10 +869,13 @@ public class Hero extends Char {
 		boolean actResult;
 		if (curAction == null) {
 			
+						boolean fastRest = false;
 			if (resting) {
 				spendConstant( TIME_TO_REST );
 				next();
+				fastRest = (++restBatch % 10) != 0;
 			} else {
+				restBatch = 0;
 				ready();
 			}
 
@@ -884,7 +888,7 @@ public class Hero extends Char {
 				}
 			}
 			
-			actResult = false;
+			actResult = fastRest;
 			
 		} else {
 			
