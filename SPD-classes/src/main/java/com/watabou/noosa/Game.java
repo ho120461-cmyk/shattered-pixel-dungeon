@@ -269,7 +269,7 @@ public class Game implements ApplicationListener {
 	protected void update() {
 		//game will not process more than 200ms of graphics time per frame
 		float frameDelta = Math.min(0.2f, Gdx.graphics.getDeltaTime());
-		Game.elapsed = Game.timeScale * 2f * frameDelta;
+		Game.elapsed = Game.timeScale * 3f * frameDelta;
 		Game.timeTotal += Game.elapsed;
 		
 		Game.realTime = TimeUtils.millis();
